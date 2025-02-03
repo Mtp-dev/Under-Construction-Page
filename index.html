@@ -1,0 +1,188 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>HexedMC - Under Construction</title>
+    <style>
+        body {
+            margin: 0;
+            overflow: hidden;
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            align-items: center;
+            height: 100vh;
+            background: #000;
+            color: white;
+            font-family: Arial, sans-serif;
+            text-align: center;
+            cursor: pointer;
+            user-select: none;
+            position: relative;
+        }
+
+        .title {
+            font-size: 50px;
+            font-weight: bold;
+            animation: colorShift 5s infinite alternate, pulse 1.5s infinite;
+            position: relative;
+            z-index: 10;
+        }
+
+        .subtitle {
+            font-size: 20px;
+            margin-top: 10px;
+            animation: rainbow 5s infinite linear;
+            position: relative;
+            z-index: 10;
+        }
+
+        @keyframes colorShift {
+            0% { color: #a855f7; }
+            50% { color: #9333ea; }
+            100% { color: #7e22ce; }
+        }
+
+        @keyframes rainbow {
+            0% { color: red; }
+            14% { color: orange; }
+            28% { color: yellow; }
+            42% { color: green; }
+            57% { color: blue; }
+            71% { color: indigo; }
+            85% { color: violet; }
+            100% { color: red; }
+        }
+
+        .scoreboard {
+            position: absolute;
+            top: 10px;
+            left: 10px;
+            font-size: 20px;
+            font-weight: bold;
+            color: white;
+            background: rgba(0, 0, 0, 0.5);
+            padding: 10px;
+            border-radius: 5px;
+        }
+
+        .glowing-text {
+            position: absolute;
+            top: 50px;
+            left: 10px;
+            font-size: 14px;
+            font-weight: bold;
+            color: #ffcc00;
+            text-shadow: 0 0 5px #ffcc00, 0 0 10px #ff9900;
+        }
+
+        .snowflake {
+            position: absolute;
+            background: white;
+            width: 5px;
+            height: 5px;
+            border-radius: 50%;
+            opacity: 0.8;
+            animation: fall linear infinite;
+        }
+
+        @keyframes fall {
+            from { transform: translateY(-20vh); }
+            to { transform: translateY(110vh); }
+        }
+
+        .snake {
+            position: absolute;
+            width: 15px;
+            height: 15px;
+            background: limegreen;
+            border-radius: 50%;
+        }
+    </style>
+</head>
+<body onclick="redirectToDiscord()">
+    <div class="scoreboard">Score: <span id="score">0</span> | Highscore: <span id="highscore">0</span></div>
+    <div class="glowing-text">Make Sure to post your high score in the discord</div>
+    <div class="title" style="animation: colorShift 5s infinite alternate;">HexedMC - Under Construction</div>
+    <div class="subtitle" style="animation: rainbow 5s infinite linear;">With Love - MtpDev</div>
+
+    <script>
+        function redirectToDiscord() {
+            document.body.style.transform = "scale(0.95)";
+            setTimeout(() => {
+                window.location.href = "https://discord.gg/hwgbzJ8XPb";
+            }, 300);
+        }
+
+        let score = 0;
+        let highscore = localStorage.getItem("highscore") || 0;
+        document.getElementById("highscore").innerText = highscore;
+
+        function createSnowflakes() {
+            for (let i = 0; i < 200; i++) {
+                let snowflake = document.createElement("div");
+                snowflake.classList.add("snowflake");
+                document.body.appendChild(snowflake);
+                
+                let size = Math.random() * 5 + 2;
+                let posX = Math.random() * window.innerWidth;
+                let posY = Math.random() * -window.innerHeight;
+                let duration = Math.random() * 5 + 5;
+                let delay = Math.random() * 5;
+                
+                snowflake.style.width = size + "px";
+                snowflake.style.height = size + "px";
+                snowflake.style.left = posX + "px";
+                snowflake.style.top = posY + "px";
+                snowflake.style.animationDuration = duration + "s";
+                snowflake.style.animationDelay = delay + "s";
+
+                snowflake.dataset.eaten = "false";
+                document.body.appendChild(snowflake);
+            }
+        }
+        createSnowflakes();
+
+        let snake = [];
+        let snakeLength = 5;
+
+        document.addEventListener("mousemove", (event) => {
+            let segment = document.createElement("div");
+            segment.classList.add("snake");
+            segment.style.left = event.clientX + "px";
+            segment.style.top = event.clientY + "px";
+            document.body.appendChild(segment);
+            snake.push(segment);
+
+            if (snake.length > snakeLength) {
+                let oldSegment = snake.shift();
+                oldSegment.remove();
+            }
+
+            document.querySelectorAll(".snowflake").forEach(snowflake => {
+                let rect1 = segment.getBoundingClientRect();
+                let rect2 = snowflake.getBoundingClientRect();
+                if (
+                    rect1.left < rect2.right &&
+                    rect1.right > rect2.left &&
+                    rect1.top < rect2.bottom &&
+                    rect1.bottom > rect2.top
+                ) {
+                    if (snowflake.dataset.eaten === "false") {
+                        snowflake.remove();
+                        snakeLength += 2;
+                        score += 100;
+                        document.getElementById("score").innerText = score;
+                        if (score > highscore) {
+                            highscore = score;
+                            localStorage.setItem("highscore", highscore);
+                            document.getElementById("highscore").innerText = highscore;
+                        }
+                    }
+                }
+            });
+        });
+    </script>
+</body>
+</html>
